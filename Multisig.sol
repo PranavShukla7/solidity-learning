@@ -50,14 +50,8 @@ contract MultiSigWallet {
         _;
     }
 
-    constructor(
-        address[] memory _owners,
-        uint256 _requiredApprovals
-    ) {
-        if (
-            _requiredApprovals == 0 ||
-            _requiredApprovals > _owners.length
-        ) {
+    constructor(address[] memory _owners,uint256 _requiredApprovals) {
+        if (_requiredApprovals == 0 ||_requiredApprovals > _owners.length) {
             revert InvalidApprovals();
         }
 
@@ -77,13 +71,7 @@ contract MultiSigWallet {
 
     receive() external payable {}
 
-    function submitTransaction(
-        address _to,
-        uint256 _value
-    )
-        public
-        onlyOwner
-    {
+    function submitTransaction(address _to,uint256 _value) public onlyOwner{
         uint256 txId = transactions.length;
 
         transactions.push(
@@ -95,19 +83,10 @@ contract MultiSigWallet {
             })
         );
 
-        emit TransactionSubmitted(
-            txId,
-            _to,
-            _value
-        );
+        emit TransactionSubmitted(txId, _to, _value);
     }
 
-    function approveTransaction(
-        uint256 _txId
-    )
-        public
-        onlyOwner
-    {
+    function approveTransaction(uint256 _txId) public onlyOwner{
         if (_txId >= transactions.length) {
             revert InvalidTransaction();
         }
@@ -119,9 +98,7 @@ contract MultiSigWallet {
             revert AlreadyExecuted();
         }
 
-        if (
-            approved[_txId][msg.sender]
-        ) {
+        if (approved[_txId][msg.sender]) {
             revert AlreadyApproved();
         }
 
@@ -129,33 +106,21 @@ contract MultiSigWallet {
 
         txn.confirmations++;
 
-        emit TransactionApproved(
-            _txId,
-            msg.sender
-        );
+        emit TransactionApproved( _txId, msg.sender);
     }
 
-    function executeTransaction(
-        uint256 _txId
-    )
-        public
-        onlyOwner
-    {
+    function executeTransaction(uint256 _txId) public onlyOwner{
         if (_txId >= transactions.length) {
             revert InvalidTransaction();
         }
 
-        Transaction storage txn =
-            transactions[_txId];
+        Transaction storage txn = transactions[_txId];
 
         if (txn.executed) {
             revert AlreadyExecuted();
         }
 
-        if (
-            txn.confirmations <
-            requiredApprovals
-        ) {
+        if (txn.confirmations < requiredApprovals) {
             revert NotEnoughApprovals();
         }
 
@@ -175,32 +140,16 @@ contract MultiSigWallet {
         );
     }
 
-    function getTransactionCount()
-        public
-        view
-        returns (uint256)
-    {
+    function getTransactionCount() public view returns (uint256){
         return transactions.length;
     }
 
-    function getTransaction(
-        uint256 _txId
-    )
-        public
-        view
-        returns (
-            address,
-            uint256,
-            bool,
-            uint256
-        )
-    {
+    function getTransaction(uint256 _txId) public view returns (address,uint256,bool,uint256){
         if (_txId >= transactions.length) {
             revert InvalidTransaction();
         }
 
-        Transaction memory txn =
-            transactions[_txId];
+        Transaction memory txn = transactions[_txId];
 
         return (
             txn.to,
