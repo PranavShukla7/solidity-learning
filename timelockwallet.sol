@@ -99,3 +99,53 @@ contract TimelockWallet {
         if (
             block.timestamp <
             txn.executeAfter
+        ) {
+            revert TooEarly();
+        }
+
+        txn.executed = true;
+
+        (bool success, ) =
+            txn.to.call{
+                value: txn.value
+            }("");
+
+        if (!success) {
+            revert TransferFailed();
+        }
+
+        emit TransactionExecuted(
+            _txId
+        );
+    }
+
+    function getTransactionCount()
+        public
+        view
+        returns(uint256)
+    {
+        return transactions.length;
+    }
+
+    function getTransaction(
+        uint256 _txId
+    )
+        public
+        view
+        returns(
+            address,
+            uint256,
+            uint256,
+            bool
+        )
+    {
+        Transaction memory txn =
+            transactions[_txId];
+
+        return (
+            txn.to,
+            txn.value,
+            txn.executeAfter,
+            txn.executed
+        );
+    }
