@@ -60,3 +60,65 @@ contract Crowdfunding {
     }
 
     function contribute()
+        public
+        payable
+    {
+        if (
+            block.timestamp >
+            deadline
+        ) {
+            revert CampaignEnded();
+        }
+
+        contributions[msg.sender]
+            += msg.value;
+
+        totalRaised += msg.value;
+
+        emit Contributed(
+            msg.sender,
+            msg.value
+        );
+    }
+
+    function withdrawFunds()
+        public
+        onlyOwner
+    {
+        if (
+            block.timestamp <
+            deadline
+        ) {
+            revert CampaignNotEnded();
+        }
+
+        if (
+            totalRaised < goal
+        ) {
+            revert GoalNotReached();
+        }
+
+        uint256 amount =
+            address(this).balance;
+
+        (bool success, ) =
+            payable(owner)
+                .call{
+                    value: amount
+                }("");
+
+        if (!success) {
+            revert TransferFailed();
+        }
+
+        emit FundsWithdrawn(
+            amount
+        );
+    }
+
+    function claimRefund()
+        public
+    {
+        if (
+            block.timestamp <
+            deadline
