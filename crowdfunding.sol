@@ -122,3 +122,64 @@ contract Crowdfunding {
         if (
             block.timestamp <
             deadline
+        ) {
+            revert CampaignNotEnded();
+        }
+
+        if (
+            totalRaised >= goal
+        ) {
+            revert GoalReached();
+        }
+
+        uint256 amount =
+            contributions[msg.sender];
+
+        if (amount == 0) {
+            revert NoContribution();
+        }
+
+        contributions[msg.sender]
+            = 0;
+
+        (bool success, ) =
+            payable(msg.sender)
+                .call{
+                    value: amount
+                }("");
+
+        if (!success) {
+            revert TransferFailed();
+        }
+
+        emit Refunded(
+            msg.sender,
+            amount
+        );
+    }
+
+    function campaignSuccessful()
+        public
+        view
+        returns (bool)
+    {
+        return
+            totalRaised >= goal;
+    }
+
+    function timeRemaining()
+        public
+        view
+        returns (uint256)
+    {
+        if (
+            block.timestamp >=
+            deadline
+        ) {
+            return 0;
+        }
+
+        return
+            deadline -
+            block.timestamp;
+    }
