@@ -170,4 +170,37 @@ contract TimelockWallet {
             txn.cancelled
         );
     }
+
+    function cancelTransaction(
+        uint256 _txId
+    )
+        public
+        onlyOwner
+        returns(bool cancelled)
+    {
+        if (
+            _txId >=
+            transactions.length
+        ) {
+            revert InvalidTransaction();
+        }
+
+        Transaction storage txn =
+            transactions[_txId];
+
+        if (txn.executed) {
+            revert AlreadyExecuted();
+        }
+
+        if (txn.cancelled) {
+            revert InvalidTransaction();
+        }
+
+        txn.cancelled = true;
+        cancelled = true;
+
+        emit TransactionCancelled(
+            _txId
+        );
+    }
 }
