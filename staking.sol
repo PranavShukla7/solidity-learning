@@ -174,5 +174,5 @@ contract Staking {
             user.lastUpdated,
             calculateRewards(_user)
         );
-    }
+    } 
 }
