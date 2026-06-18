@@ -5,7 +5,7 @@ contract TimelockWallet {
 
     address public owner;
 
-    uint256 public constant DELAY = 1 days;
+    uint256 public delay = 1 days;
 
     struct Transaction {
         address to;
@@ -62,7 +62,7 @@ contract TimelockWallet {
                 value: _value,
                 executeAfter:
                     block.timestamp +
-                    DELAY,
+                    delay,
                 executed: false
             })
         );
@@ -72,8 +72,17 @@ contract TimelockWallet {
             _to,
             _value,
             block.timestamp +
-            DELAY
+            delay
         );
+    }
+
+    function setDelay(
+        uint256 _delay
+    )
+        public
+        onlyOwner
+    {
+        delay = _delay;
     }
 
     function executeTransaction(
@@ -149,3 +158,4 @@ contract TimelockWallet {
             txn.executed
         );
     }
+}
