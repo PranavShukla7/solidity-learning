@@ -34,6 +34,10 @@ contract TimelockWallet {
         uint256 indexed txId
     );
 
+    event TransactionCancelled(
+        uint256 indexed txId
+    );
+
     modifier onlyOwner() {
         if (msg.sender != owner) {
             revert NotOwner();
@@ -105,6 +109,10 @@ contract TimelockWallet {
 
         if (txn.executed) {
             revert AlreadyExecuted();
+        }
+
+        if (txn.cancelled) {
+            revert InvalidTransaction();
         }
 
         if (
