@@ -49,3 +49,53 @@ contract TimelockWallet {
     function queueTransaction(
         address _to,
         uint256 _value
+    )
+        public
+        onlyOwner
+    {
+        uint256 txId =
+            transactions.length;
+
+        transactions.push(
+            Transaction({
+                to: _to,
+                value: _value,
+                executeAfter:
+                    block.timestamp +
+                    DELAY,
+                executed: false
+            })
+        );
+
+        emit TransactionQueued(
+            txId,
+            _to,
+            _value,
+            block.timestamp +
+            DELAY
+        );
+    }
+
+    function executeTransaction(
+        uint256 _txId
+    )
+        public
+        onlyOwner
+    {
+        if (
+            _txId >=
+            transactions.length
+        ) {
+            revert InvalidTransaction();
+        }
+
+        Transaction storage txn =
+            transactions[_txId];
+
+        if (txn.executed) {
+            revert AlreadyExecuted();
+        }
+
+        if (
+            block.timestamp <
+            txn.executeAfter
