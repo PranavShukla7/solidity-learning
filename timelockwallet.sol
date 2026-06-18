@@ -12,6 +12,7 @@ contract TimelockWallet {
         uint256 value;
         uint256 executeAfter;
         bool executed;
+        bool cancelled;
     }
 
     Transaction[] public transactions;
@@ -63,7 +64,8 @@ contract TimelockWallet {
                 executeAfter:
                     block.timestamp +
                     delay,
-                executed: false
+                executed: false,
+                cancelled: false
             })
         );
 
@@ -145,6 +147,7 @@ contract TimelockWallet {
             address,
             uint256,
             uint256,
+            bool,
             bool
         )
     {
@@ -155,7 +158,8 @@ contract TimelockWallet {
             txn.to,
             txn.value,
             txn.executeAfter,
-            txn.executed
+            txn.executed,
+            txn.cancelled
         );
     }
 }
